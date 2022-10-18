@@ -540,7 +540,7 @@ footer {
 .vtimeline-point {
   position: relative;
   display: block;
-  vertical-align: top;
+  // vertical-align: top;
   margin-bottom: 30px;
 }
 
@@ -646,7 +646,7 @@ footer {
 
 .project {
   position: relative;
-  width: 900px;
+  max-width: 900px;
   margin: 0 auto 30px auto;
   background: #fff;
   border-radius: 4px;
