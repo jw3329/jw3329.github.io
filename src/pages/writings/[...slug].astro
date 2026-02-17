@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getWritings, getWritingBySlug, renderMarkdown } from '../../lib/writings';
+
+export async function getStaticPaths() {
+  const writings = await getWritings();
+  return writings.map((writing) => ({
+    params: { slug: writing.slug },
+    props: { slug: writing.slug },
+  }));
+}
+
+const { slug } = Astro.props;
+const writing = await getWritingBySlug(slug);
+
+if (!writing) {
+  return Astro.redirect('/writings/');
+}
+
+const htmlContent = renderMarkdown(writing.content);
+const createdAt = new Date(writing.created_at);
+
+const formattedDate = createdAt.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<BaseLayout
+  title={writing.title}
+  description={writing.description}
+  ogType="article"
+  publishedDate={createdAt}
+>
+  <a href="/writings/" class="back-link">&larr; Back to writings</a>
+
+  <article>
+    <div class="article-header">
+      <h1>{writing.title}</h1>
+      <div class="writing-meta">
+        <time datetime={createdAt.toISOString()}>{formattedDate}</time>
+        <span class="tag accent">{writing.category}</span>
+        {writing.tags && writing.tags.length > 0 && (
+          <div class="writing-meta tags">
+            {writing.tags.map((tag) => <span class="tag">{tag}</span>)}
+          </div>
+        )}
+      </div>
+    </div>
+
+    <div class="prose" set:html={htmlContent} />
+  </article>
+</BaseLayout>

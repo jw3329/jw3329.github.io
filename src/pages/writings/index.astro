@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import WritingCard from '../../components/WritingCard.astro';
+import { getWritings } from '../../lib/writings';
+
+const allWritings = await getWritings();
+---
+
+<BaseLayout title="Writings" description="Thoughts on development, life, and everything in between.">
+  <div class="page-header">
+    <h1>Writings</h1>
+    <p>Thoughts on development, life, and everything in between.</p>
+  </div>
+
+  <div class="category-filters">
+    <button class="active" data-filter="all">All</button>
+    <button data-filter="dev">Dev</button>
+    <button data-filter="personal">Personal</button>
+  </div>
+
+  <div id="writings-list">
+    {allWritings.map((writing) => (
+      <div data-category={writing.category}>
+        <WritingCard
+          title={writing.title}
+          description={writing.description}
+          date={new Date(writing.created_at)}
+          category={writing.category}
+          slug={writing.slug}
+          tags={writing.tags}
+        />
+      </div>
+    ))}
+  </div>
+
+  {allWritings.length === 0 && (
+    <p style="color: var(--text-secondary); text-align: center; padding: 3rem 0;">
+      No writings yet. Check back soon!
+    </p>
+  )}
+</BaseLayout>
+
+<script is:inline>
+  document.querySelectorAll('.category-filters button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const filter = btn.getAttribute('data-filter');
+
+      document.querySelectorAll('.category-filters button').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      document.querySelectorAll('#writings-list > div').forEach((card) => {
+        if (filter === 'all' || card.getAttribute('data-category') === filter) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>

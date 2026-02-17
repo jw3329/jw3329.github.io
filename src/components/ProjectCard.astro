@@ -1,0 +1,80 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  tech: string[];
+  link?: string;
+  github?: string;
+  slug: string;
+}
+
+const { title, description, tech, link, github, slug } = Astro.props;
+---
+
+<a href={`/projects/${slug}/`} class="project-card">
+  <h3>{title}</h3>
+  <p>{description}</p>
+  <div class="tech-stack">
+    {tech.map((t) => <span class="tag">{t}</span>)}
+  </div>
+  <div class="card-links">
+    {link && <span class="link-label">Live &nearr;</span>}
+    {github && <span class="link-label">Code &nearr;</span>}
+  </div>
+</a>
+
+<style>
+  .project-card {
+    display: block;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    text-decoration: none;
+    transition: all var(--transition);
+    box-shadow: var(--card-shadow);
+  }
+
+  .project-card:hover {
+    box-shadow: var(--card-shadow-hover);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .project-card:hover h3 {
+    color: var(--accent);
+  }
+
+  h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    transition: color var(--transition);
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+    line-height: 1.5;
+  }
+
+  .tech-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.75rem;
+  }
+
+  .card-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .link-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--accent);
+  }
+</style>

@@ -1,0 +1,82 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  date: Date;
+  category: string;
+  slug: string;
+  tags?: string[];
+}
+
+const { title, description, date, category, slug, tags = [] } = Astro.props;
+
+const formattedDate = date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+---
+
+<a href={`/writings/${slug}/`} class="writing-card">
+  <div class="card-top">
+    <time datetime={date.toISOString()}>{formattedDate}</time>
+    <span class="tag accent">{category}</span>
+  </div>
+  <h3>{title}</h3>
+  <p>{description}</p>
+  {tags.length > 0 && (
+    <div class="card-tags">
+      {tags.map((tag) => <span class="tag">{tag}</span>)}
+    </div>
+  )}
+</a>
+
+<style>
+  .writing-card {
+    display: block;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--border);
+    transition: all var(--transition);
+    text-decoration: none;
+  }
+
+  .writing-card:hover {
+    padding-left: 0.5rem;
+  }
+
+  .writing-card:hover h3 {
+    color: var(--accent);
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  time {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    transition: color var(--transition);
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+    line-height: 1.5;
+  }
+
+  .card-tags {
+    display: flex;
+    gap: 0.35rem;
+    margin-top: 0.6rem;
+  }
+</style>

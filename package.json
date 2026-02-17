@@ -1,29 +1,22 @@
 {
-  "name": "devportfolio-template",
-  "version": "1.1.3",
-  "description": "",
-  "main": "js/scripts.js",
+  "name": "junwon-site",
+  "type": "module",
+  "version": "1.0.0",
   "scripts": {
-    "watch": "gulp watch"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "db:migrate": "supabase db push --db-url $DATABASE_URL",
+    "db:new": "supabase migration new"
   },
-  "keywords": [
-    "portfolio",
-    "personal",
-    "website",
-    "tech",
-    "coding",
-    "dev"
-  ],
-  "author": "Ryan Fitzgerald",
-  "license": "MIT",
+  "dependencies": {
+    "@astrojs/rss": "^4.0.15",
+    "@astrojs/sitemap": "^3.7.0",
+    "@supabase/supabase-js": "^2.95.3",
+    "astro": "^5.17.2",
+    "marked": "^17.0.2"
+  },
   "devDependencies": {
-    "gulp": "^4.0.0",
-    "gulp-autoprefixer": "^6.0.0",
-    "gulp-plumber": "^1.2.0",
-    "gulp-rename": "^1.4.0",
-    "gulp-sass": "^5.1.0",
-    "gulp-uglify": "^3.0.1",
-    "gulp-wait": "0.0.2",
-    "sass": "^1.55.0"
+    "supabase": "^2.76.9"
   }
 }
