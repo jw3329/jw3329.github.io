@@ -26,6 +26,9 @@ const formattedDate = createdAt.toLocaleDateString('en-US', {
   month: 'long',
   day: 'numeric',
 });
+
+const wordCount = writing.content.trim().split(/\s+/).length;
+const readTime = Math.max(1, Math.round(wordCount / 250));
 ---
 
 <BaseLayout
@@ -41,6 +44,9 @@ const formattedDate = createdAt.toLocaleDateString('en-US', {
       <h1>{writing.title}</h1>
       <div class="writing-meta">
         <time datetime={createdAt.toISOString()}>{formattedDate}</time>
+        <span class="meta-sep"></span>
+        <span class="read-time">{readTime} min read</span>
+        <span class="meta-sep"></span>
         <span class="tag accent">{writing.category}</span>
         {writing.tags && writing.tags.length > 0 && (
           <div class="writing-meta tags">

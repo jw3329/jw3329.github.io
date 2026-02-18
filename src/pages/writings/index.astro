@@ -52,6 +52,9 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
           <h1 id="post-title"></h1>
           <div class="writing-meta">
             <time id="post-date"></time>
+            <span class="meta-sep"></span>
+            <span id="post-readtime" class="read-time"></span>
+            <span class="meta-sep"></span>
             <span id="post-category" class="tag accent"></span>
             <div id="post-tags" class="writing-meta tags"></div>
           </div>
@@ -63,9 +66,9 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
   </div>
 </BaseLayout>
 
-<style>
+<style is:global>
   /* Writing card styles */
-  .writing-card {
+  #writings-app .writing-card {
     display: block;
     padding: 1.25rem 0;
     border-bottom: 1px solid var(--border);
@@ -74,27 +77,27 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     cursor: pointer;
   }
 
-  .writing-card:hover {
+  #writings-app .writing-card:hover {
     padding-left: 0.5rem;
   }
 
-  .writing-card:hover h3 {
+  #writings-app .writing-card:hover h3 {
     color: var(--accent);
   }
 
-  .writing-card .card-top {
+  #writings-app .writing-card .card-top {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 0.5rem;
   }
 
-  .writing-card time {
+  #writings-app .writing-card time {
     font-size: 0.8rem;
     color: var(--text-secondary);
   }
 
-  .writing-card h3 {
+  #writings-app .writing-card h3 {
     font-size: 1.15rem;
     font-weight: 600;
     margin-bottom: 0.35rem;
@@ -102,57 +105,57 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     color: var(--text);
   }
 
-  .writing-card p {
+  #writings-app .writing-card p {
     font-size: 0.9rem;
     color: var(--text-secondary);
     margin-bottom: 0;
     line-height: 1.5;
   }
 
-  .writing-card .card-tags {
+  #writings-app .writing-card .card-tags {
     display: flex;
     gap: 0.35rem;
     margin-top: 0.6rem;
   }
 
   /* Loading skeletons */
-  .loading-state {
+  #writings-app .loading-state {
     padding: 1rem 0;
   }
 
-  .skeleton-card,
-  .skeleton-title,
-  .skeleton-meta,
-  .skeleton-line {
+  #writings-app .skeleton-card,
+  #writings-app .skeleton-title,
+  #writings-app .skeleton-meta,
+  #writings-app .skeleton-line {
     background: var(--bg-secondary);
     border-radius: 6px;
     animation: pulse 1.5s ease-in-out infinite;
   }
 
-  .skeleton-card {
+  #writings-app .skeleton-card {
     height: 90px;
     margin-bottom: 1rem;
   }
 
-  .skeleton-title {
+  #writings-app .skeleton-title {
     height: 2.5rem;
     width: 70%;
     margin-bottom: 1rem;
   }
 
-  .skeleton-meta {
+  #writings-app .skeleton-meta {
     height: 1.25rem;
     width: 40%;
     margin-bottom: 2rem;
   }
 
-  .skeleton-line {
+  #writings-app .skeleton-line {
     height: 1rem;
     width: 100%;
     margin-bottom: 0.75rem;
   }
 
-  .skeleton-line.short {
+  #writings-app .skeleton-line.short {
     width: 60%;
   }
 
@@ -161,13 +164,13 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     50% { opacity: 0.4; }
   }
 
-  .empty-state {
+  #writings-app .empty-state {
     text-align: center;
     padding: 3rem 0;
     color: var(--text-secondary);
   }
 
-  .giscus-wrapper {
+  #writings-app .giscus-wrapper {
     margin-top: 3rem;
     padding-top: 2rem;
     border-top: 1px solid var(--border);
@@ -345,11 +348,15 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
 
     var post = resp.data;
     var createdAt = new Date(post.created_at);
+    var wc = post.content.trim().split(/\s+/).length;
+    var readMin = Math.max(1, Math.round(wc / 250));
 
     postTitle.textContent = post.title;
     postDate.textContent = formatDateLong(post.created_at);
     postDate.setAttribute('datetime', createdAt.toISOString());
     postCategory.textContent = post.category;
+
+    document.getElementById('post-readtime').textContent = readMin + ' min read';
 
     postTags.innerHTML = '';
     if (post.tags && post.tags.length > 0) {
