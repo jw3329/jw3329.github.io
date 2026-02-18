@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Giscus from '../../components/Giscus.astro';
 import { getWritings, getWritingBySlug, renderMarkdown } from '../../lib/writings';
 
 export async function getStaticPaths() {
@@ -51,4 +52,6 @@ const formattedDate = createdAt.toLocaleDateString('en-US', {
 
     <div class="prose" set:html={htmlContent} />
   </article>
+
+  <Giscus />
 </BaseLayout>

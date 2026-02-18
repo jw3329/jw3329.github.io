@@ -1,0 +1,63 @@
+---
+import { GISCUS } from '../config';
+---
+
+<section class="giscus-wrapper" aria-label="Comments">
+  <div
+    id="giscus-container"
+    data-repo={GISCUS.repo}
+    data-repo-id={GISCUS.repoId}
+    data-category={GISCUS.category}
+    data-category-id={GISCUS.categoryId}
+    data-mapping={GISCUS.mapping}
+    data-reactions-enabled={GISCUS.reactionsEnabled ? '1' : '0'}
+    data-input-position={GISCUS.inputPosition}
+    data-lang={GISCUS.lang}
+  ></div>
+</section>
+
+<script is:inline>
+  (function () {
+    var container = document.getElementById('giscus-container');
+    if (!container) return;
+
+    var theme =
+      document.documentElement.getAttribute('data-theme') === 'dark'
+        ? 'dark'
+        : 'light';
+
+    var script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    script.setAttribute('data-repo', container.dataset.repo);
+    script.setAttribute('data-repo-id', container.dataset.repoId);
+    script.setAttribute('data-category', container.dataset.category);
+    script.setAttribute('data-category-id', container.dataset.categoryId);
+    script.setAttribute('data-mapping', container.dataset.mapping);
+    script.setAttribute('data-strict', '0');
+    script.setAttribute('data-reactions-enabled', container.dataset.reactionsEnabled);
+    script.setAttribute('data-emit-metadata', '0');
+    script.setAttribute('data-input-position', container.dataset.inputPosition);
+    script.setAttribute('data-theme', theme);
+    script.setAttribute('data-lang', container.dataset.lang);
+    script.setAttribute('crossorigin', 'anonymous');
+    script.async = true;
+    container.appendChild(script);
+
+    document.addEventListener('theme-change', function (e) {
+      var iframe = document.querySelector('iframe.giscus-frame');
+      if (!iframe) return;
+      iframe.contentWindow.postMessage(
+        { giscus: { setConfig: { theme: e.detail.theme } } },
+        'https://giscus.app'
+      );
+    });
+  })();
+</script>
+
+<style>
+  .giscus-wrapper {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+</style>

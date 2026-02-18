@@ -65,6 +65,7 @@
   function setTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
+    document.dispatchEvent(new CustomEvent('theme-change', { detail: { theme } }));
   }
 
   setTheme(getTheme());
