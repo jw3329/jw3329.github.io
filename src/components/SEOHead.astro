@@ -1,5 +1,5 @@
 ---
-import { SITE } from '../config';
+import { SITE } from "../config";
 
 interface Props {
   title?: string;
@@ -15,7 +15,7 @@ interface Props {
 const {
   title,
   description = SITE.description,
-  ogType = 'website',
+  ogType = "website",
   publishedDate,
   articleCategory,
   articleTags,
@@ -25,20 +25,24 @@ const {
 
 const pageTitle = title ? `${title} | ${SITE.title}` : SITE.title;
 const canonicalURL = new URL(Astro.url.pathname, SITE.url);
-const ogImageURL = new URL(ogImage || '/og-default.png', SITE.url).href;
+const ogImageURL = new URL(ogImage || "/og-default.jpg", SITE.url).href;
 const jsonLdItems = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 ---
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="generator" content={Astro.generator} />
-<meta name="google-site-verification" content="Heq9MKLGRwqO8Ks2Bolr28uEc6sn5_qYtpvwPyAQMlw" />
 
 <title>{pageTitle}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={canonicalURL} />
 <link rel="sitemap" href="/sitemap-index.xml" />
-<link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title={SITE.title}
+  href="/rss.xml"
+/>
 
 <!-- Favicon -->
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -60,31 +64,41 @@ const jsonLdItems = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={ogImageURL} />
 
-{publishedDate && (
-  <meta property="article:published_time" content={publishedDate.toISOString()} />
-)}
-{publishedDate && (
-  <meta property="article:author" content={SITE.url} />
-)}
-{articleCategory && (
-  <meta property="article:section" content={articleCategory} />
-)}
-{articleTags && articleTags.map((tag) => (
-  <meta property="article:tag" content={tag} />
-))}
+{
+  publishedDate && (
+    <meta
+      property="article:published_time"
+      content={publishedDate.toISOString()}
+    />
+  )
+}
+{publishedDate && <meta property="article:author" content={SITE.url} />}
+{
+  articleCategory && (
+    <meta property="article:section" content={articleCategory} />
+  )
+}
+{
+  articleTags &&
+    articleTags.map((tag) => <meta property="article:tag" content={tag} />)
+}
 
 <!-- Structured Data -->
-{jsonLdItems.map((item) => (
-  <script type="application/ld+json" set:html={JSON.stringify(item)} />
-))}
+{
+  jsonLdItems.map((item) => (
+    <script type="application/ld+json" set:html={JSON.stringify(item)} />
+  ))
+}
 
 <!-- Theme -->
 <script is:inline>
   const theme = (() => {
-    if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-      return localStorage.getItem('theme');
+    if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
+      return localStorage.getItem("theme");
     }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
   })();
-  document.documentElement.setAttribute('data-theme', theme);
+  document.documentElement.setAttribute("data-theme", theme);
 </script>
