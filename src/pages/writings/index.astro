@@ -1,9 +1,13 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import WritingCard from '../../components/WritingCard.astro';
+import { getWritings } from '../../lib/writings';
 import { GISCUS } from '../../config';
 
 const supabaseUrl = import.meta.env.SUPABASE_URL || '';
 const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
+const allWritings = await getWritings();
+const hasStatic = allWritings.length > 0;
 ---
 
 <BaseLayout title="Writings" description="Thoughts on development, life, and everything in between.">
@@ -26,8 +30,21 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
         <button data-filter="personal">Personal</button>
       </div>
 
-      <div id="writings-list"></div>
-      <div id="writings-loading" class="loading-state">
+      <div id="writings-list">
+        {allWritings.map((writing) => (
+          <div data-category={writing.category}>
+            <WritingCard
+              title={writing.title}
+              description={writing.description}
+              date={new Date(writing.created_at)}
+              category={writing.category}
+              slug={writing.slug}
+              tags={writing.tags}
+            />
+          </div>
+        ))}
+      </div>
+      <div id="writings-loading" class="loading-state" hidden={hasStatic}>
         <div class="skeleton-card"></div>
         <div class="skeleton-card"></div>
         <div class="skeleton-card"></div>
@@ -245,9 +262,11 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
       return;
     }
 
-    writingsLoading.hidden = false;
-    writingsList.innerHTML = '';
-    writingsEmpty.hidden = true;
+    var hasStaticContent = writingsList.children.length > 0;
+    if (!hasStaticContent) {
+      writingsLoading.hidden = false;
+      writingsEmpty.hidden = true;
+    }
 
     var resp = await supabase
       .from('writings')
@@ -258,8 +277,10 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     writingsLoading.hidden = true;
 
     if (resp.error) {
-      writingsEmpty.textContent = 'Failed to load writings.';
-      writingsEmpty.hidden = false;
+      if (!hasStaticContent) {
+        writingsEmpty.textContent = 'Failed to load writings.';
+        writingsEmpty.hidden = false;
+      }
       return;
     }
 

@@ -2,10 +2,14 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import WritingCard from '../components/WritingCard.astro';
+import { SITE } from '../config';
+import { getWritings } from '../lib/writings';
 import { getCollection } from 'astro:content';
 
 const supabaseUrl = import.meta.env.SUPABASE_URL || '';
 const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
+const recentWritings = (await getWritings()).slice(0, 3);
 
 const allProjects = (await getCollection('projects'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
@@ -13,9 +17,29 @@ const allProjects = (await getCollection('projects'))
 const featuredProjects = allProjects
   .filter((p) => p.data.featured && p.id !== 'tably' && p.id !== 'wisebuy')
   .slice(0, 4);
+
+const homepageJsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE.title,
+    url: SITE.url,
+    description: SITE.description,
+    author: { '@type': 'Person', name: SITE.author, url: SITE.url },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: SITE.author,
+    url: SITE.url,
+    sameAs: [SITE.socials.github, SITE.socials.linkedin],
+    jobTitle: 'Member of Technical Staff',
+    worksFor: { '@type': 'Organization', name: 'CurieTech AI' },
+  },
+];
 ---
 
-<BaseLayout>
+<BaseLayout jsonLd={homepageJsonLd}>
   <Hero />
 
   <section class="products-section">
@@ -78,7 +102,20 @@ const featuredProjects = allProjects
       data-supabase-url={supabaseUrl}
       data-supabase-key={supabaseKey}
     >
-      <p style="color: var(--text-secondary);">Loading...</p>
+      {recentWritings.length > 0 ? (
+        recentWritings.map((writing) => (
+          <WritingCard
+            title={writing.title}
+            description={writing.description}
+            date={new Date(writing.created_at)}
+            category={writing.category}
+            slug={writing.slug}
+            tags={writing.tags}
+          />
+        ))
+      ) : (
+        <p style="color: var(--text-secondary);">Loading...</p>
+      )}
     </div>
   </section>
 
@@ -296,7 +333,9 @@ const featuredProjects = allProjects
   var key = container.dataset.supabaseKey;
 
   if (!url || !key) {
-    container.innerHTML = '<p style="color:var(--text-secondary)">Writings coming soon...</p>';
+    if (!container.querySelector('.writing-card')) {
+      container.innerHTML = '<p style="color:var(--text-secondary)">Writings coming soon...</p>';
+    }
   } else {
     var supabase = createClient(url, key);
 
@@ -308,7 +347,9 @@ const featuredProjects = allProjects
       .limit(3);
 
     if (resp.error || !resp.data || resp.data.length === 0) {
-      container.innerHTML = '<p style="color:var(--text-secondary)">Writings coming soon...</p>';
+      if (!container.querySelector('.writing-card')) {
+        container.innerHTML = '<p style="color:var(--text-secondary)">Writings coming soon...</p>';
+      }
     } else {
       container.innerHTML = resp.data.map(function (w) {
         var date = new Date(w.created_at);

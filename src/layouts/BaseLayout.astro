@@ -9,16 +9,29 @@ interface Props {
   description?: string;
   ogType?: string;
   publishedDate?: Date;
+  articleCategory?: string;
+  articleTags?: string[];
+  ogImage?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   wide?: boolean;
 }
 
-const { title, description, ogType, publishedDate, wide = false } = Astro.props;
+const { title, description, ogType, publishedDate, articleCategory, articleTags, ogImage, jsonLd, wide = false } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <SEOHead title={title} description={description} ogType={ogType} publishedDate={publishedDate} />
+    <SEOHead
+      title={title}
+      description={description}
+      ogType={ogType}
+      publishedDate={publishedDate}
+      articleCategory={articleCategory}
+      articleTags={articleTags}
+      ogImage={ogImage}
+      jsonLd={jsonLd}
+    />
   </head>
   <body>
     <Header />
