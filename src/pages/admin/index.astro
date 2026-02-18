@@ -17,16 +17,19 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     <!-- Login View -->
     <div id="login-view" class="admin-view">
       <div class="login-card">
-        <h1>Sign in</h1>
-        <p>Admin access only.</p>
+        <div class="login-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h1>Welcome back</h1>
+        <p>Sign in to manage your writings.</p>
         <form id="login-form">
           <div class="form-group">
             <label for="login-email">Email</label>
-            <input type="email" id="login-email" required autocomplete="email" />
+            <input type="email" id="login-email" required autocomplete="email" placeholder="you@example.com" />
           </div>
           <div class="form-group">
             <label for="login-password">Password</label>
-            <input type="password" id="login-password" required autocomplete="current-password" />
+            <input type="password" id="login-password" required autocomplete="current-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" />
           </div>
           <button type="submit" class="btn btn-primary btn-full">Sign in</button>
         </form>
@@ -35,27 +38,59 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
 
     <!-- Dashboard View -->
     <div id="dashboard-view" class="admin-view" hidden>
+      <!-- Stats -->
+      <div class="stats-bar">
+        <div class="stat-card">
+          <span class="stat-value" id="stat-total">0</span>
+          <span class="stat-label">Total posts</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-published">0</span>
+          <span class="stat-label">Published</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-drafts">0</span>
+          <span class="stat-label">Drafts</span>
+        </div>
+      </div>
+
       <div class="toolbar">
-        <h1>Posts</h1>
+        <h2>All posts</h2>
         <div class="toolbar-actions">
-          <button id="new-post-btn" class="btn btn-primary">+ New post</button>
+          <button id="new-post-btn" class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New post
+          </button>
           <button id="logout-btn" class="btn btn-ghost">Sign out</button>
         </div>
       </div>
+
       <div id="posts-list" class="posts-list"></div>
-      <p id="posts-empty" class="empty-state" hidden>No posts yet. Create your first one!</p>
+
+      <div id="posts-empty" class="empty-state" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <p>No posts yet</p>
+        <span>Create your first post to get started.</span>
+      </div>
     </div>
 
     <!-- Editor View -->
     <div id="editor-view" class="admin-view" hidden>
-      <div class="toolbar">
-        <button id="back-btn" class="btn btn-ghost">&larr; Back</button>
+      <div class="editor-toolbar">
+        <button id="back-btn" class="btn btn-ghost">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Back
+        </button>
         <div class="toolbar-actions">
-          <label class="draft-toggle">
+          <label class="draft-toggle" id="draft-toggle-label">
             <input type="checkbox" id="draft-checkbox" />
-            <span>Draft</span>
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">Draft</span>
           </label>
-          <button id="save-btn" class="btn btn-primary">Save</button>
+          <button id="save-btn" class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Save
+          </button>
           <button id="delete-btn" class="btn btn-danger" hidden>Delete</button>
         </div>
       </div>
@@ -63,23 +98,42 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
       <div class="editor-meta">
         <input type="text" id="post-title" placeholder="Post title" class="input title-input" />
         <div class="meta-row">
-          <input type="text" id="post-slug" placeholder="url-slug" class="input" />
-          <select id="post-category" class="input">
-            <option value="dev">Dev</option>
-            <option value="personal">Personal</option>
-          </select>
+          <div class="input-with-label">
+            <label for="post-slug">Slug</label>
+            <input type="text" id="post-slug" placeholder="url-slug" class="input" />
+          </div>
+          <div class="input-with-label">
+            <label for="post-category">Category</label>
+            <select id="post-category" class="input">
+              <option value="dev">Dev</option>
+              <option value="personal">Personal</option>
+            </select>
+          </div>
         </div>
-        <input type="text" id="post-description" placeholder="Brief description..." class="input" />
-        <input type="text" id="post-tags" placeholder="Tags (comma-separated)" class="input" />
+        <div class="input-with-label">
+          <label for="post-description">Description</label>
+          <input type="text" id="post-description" placeholder="A brief description of your post..." class="input" />
+        </div>
+        <div class="input-with-label">
+          <label for="post-tags">Tags</label>
+          <input type="text" id="post-tags" placeholder="react, typescript, webdev" class="input" />
+        </div>
       </div>
 
       <div class="editor-split">
         <div class="editor-pane">
-          <div class="pane-label">Markdown</div>
+          <div class="pane-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Markdown
+            <span class="word-count" id="word-count">0 words</span>
+          </div>
           <textarea id="post-content" placeholder="Write your post in Markdown..." spellcheck="true"></textarea>
         </div>
         <div class="preview-pane">
-          <div class="pane-label">Preview</div>
+          <div class="pane-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Preview
+          </div>
           <div id="preview-content" class="prose"></div>
         </div>
       </div>
@@ -88,11 +142,11 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
 </BaseLayout>
 
 <style>
-  /* Layout */
   .admin-view {
     width: 100%;
   }
 
+  /* Notification */
   .notification {
     position: fixed;
     top: calc(var(--header-height) + 0.75rem);
@@ -106,6 +160,7 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     transform: translateY(-8px);
     transition: opacity 200ms ease, transform 200ms ease;
     pointer-events: none;
+    backdrop-filter: blur(8px);
   }
 
   .notification.show {
@@ -115,24 +170,39 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
   }
 
   .notification.success {
-    background: #065f46;
+    background: rgba(6, 95, 70, 0.95);
     color: #d1fae5;
+    border: 1px solid rgba(16, 185, 129, 0.3);
   }
 
   .notification.error {
-    background: #991b1b;
+    background: rgba(153, 27, 27, 0.95);
     color: #fecaca;
+    border: 1px solid rgba(239, 68, 68, 0.3);
   }
 
   /* Login */
   .login-card {
-    max-width: 380px;
-    margin: 4rem auto;
+    max-width: 400px;
+    margin: 5rem auto;
     padding: 2.5rem;
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 12px;
     box-shadow: var(--card-shadow);
+    text-align: center;
+  }
+
+  .login-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: var(--accent-light);
+    color: var(--accent);
+    margin-bottom: 1.25rem;
   }
 
   .login-card h1 {
@@ -141,8 +211,12 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
   }
 
   .login-card > p {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     font-size: 0.9rem;
+  }
+
+  .login-card form {
+    text-align: left;
   }
 
   .form-group {
@@ -159,7 +233,7 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     letter-spacing: 0.04em;
   }
 
-  /* Shared input styles */
+  /* Inputs */
   .input,
   .form-group input {
     width: 100%;
@@ -170,33 +244,60 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 6px;
-    transition: border-color var(--transition);
+    transition: border-color var(--transition), box-shadow var(--transition);
   }
 
   .input:focus,
   .form-group input:focus {
     outline: none;
     border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
   }
 
   .title-input {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    padding: 0.75rem;
+    padding: 0.75rem 0;
     letter-spacing: -0.02em;
+    border: none;
+    border-bottom: 2px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .title-input:focus {
+    border-color: var(--accent);
+    box-shadow: none;
+  }
+
+  .input-with-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .input-with-label label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   /* Buttons */
   .btn {
     font-family: inherit;
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     font-weight: 600;
     padding: 0.55rem 1.1rem;
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid transparent;
     cursor: pointer;
     transition: all var(--transition);
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
   }
 
   .btn:disabled {
@@ -212,6 +313,8 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
 
   .btn-primary:hover:not(:disabled) {
     background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
   }
 
   .btn-ghost {
@@ -223,6 +326,7 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
   .btn-ghost:hover {
     color: var(--text);
     border-color: var(--text-secondary);
+    background: var(--bg-secondary);
   }
 
   .btn-danger {
@@ -236,6 +340,45 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
 
   .btn-full {
     width: 100%;
+    justify-content: center;
+  }
+
+  /* Stats */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.25rem 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: border-color var(--transition);
+  }
+
+  .stat-card:hover {
+    border-color: var(--accent);
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.35rem;
+    font-weight: 500;
   }
 
   /* Toolbar */
@@ -243,95 +386,156 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     gap: 1rem;
   }
 
-  .toolbar h1 {
-    font-size: 1.5rem;
+  .toolbar h2 {
+    font-size: 1.15rem;
     margin: 0;
+    color: var(--text-secondary);
+    font-weight: 600;
   }
 
   .toolbar-actions {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.6rem;
   }
 
+  /* Editor toolbar */
+  .editor-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    gap: 1rem;
+  }
+
+  /* Toggle switch */
   .draft-toggle {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-secondary);
+    gap: 0.5rem;
     cursor: pointer;
+    user-select: none;
   }
 
   .draft-toggle input[type='checkbox'] {
-    accent-color: var(--accent);
-    width: 16px;
-    height: 16px;
+    display: none;
   }
 
-  /* Dashboard posts list */
+  .toggle-track {
+    width: 36px;
+    height: 20px;
+    background: var(--border);
+    border-radius: 10px;
+    position: relative;
+    transition: background var(--transition);
+  }
+
+  .toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    transition: transform var(--transition);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  .draft-toggle input:checked ~ .toggle-track {
+    background: var(--accent);
+  }
+
+  .draft-toggle input:checked ~ .toggle-track .toggle-thumb {
+    transform: translateX(16px);
+  }
+
+  .toggle-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  /* Posts list */
   .posts-list {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
   }
 
-  .post-row {
+  .post-card {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 1.25rem;
+    align-items: stretch;
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    transition: border-color var(--transition);
-    cursor: pointer;
-    gap: 1rem;
-  }
-
-  .post-row:hover {
-    border-color: var(--accent);
-  }
-
-  .post-row-info {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .post-row-title {
-    font-weight: 600;
-    font-size: 1rem;
-    color: var(--text);
-    white-space: nowrap;
+    border-radius: 10px;
     overflow: hidden;
-    text-overflow: ellipsis;
+    transition: all var(--transition);
   }
 
-  .post-row-meta {
+  .post-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+  }
+
+  .post-card-accent {
+    width: 4px;
+    flex-shrink: 0;
+  }
+
+  .post-card-accent.dev { background: var(--accent); }
+  .post-card-accent.personal { background: #f59e0b; }
+
+  .post-card-body {
+    flex: 1;
+    padding: 1rem 1.25rem;
+    min-width: 0;
+    cursor: pointer;
+  }
+
+  .post-card-header {
     display: flex;
-    gap: 0.75rem;
-    margin-top: 0.25rem;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .post-card-title {
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .post-card-status {
+    flex-shrink: 0;
   }
 
   .status-badge {
-    font-size: 0.7rem;
-    font-weight: 600;
+    font-size: 0.65rem;
+    font-weight: 700;
     text-transform: uppercase;
-    padding: 0.15rem 0.5rem;
+    padding: 0.2rem 0.6rem;
     border-radius: 9999px;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
   }
 
   .status-badge.published {
-    background: #065f46;
-    color: #d1fae5;
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+  }
+
+  :global([data-theme='dark']) .status-badge.published {
+    background: rgba(16, 185, 129, 0.15);
+    color: #6ee7b7;
   }
 
   .status-badge.draft {
@@ -339,23 +543,110 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     color: var(--tag-text);
   }
 
+  .post-card-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.6rem;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .post-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .post-card-meta {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .post-card-meta svg {
+    opacity: 0.6;
+  }
+
+  .post-card-tags {
+    display: flex;
+    gap: 0.3rem;
+  }
+
+  .post-card-tags .tag {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.45rem;
+  }
+
+  .post-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0 0.5rem;
+    border-left: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .action-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .action-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--text);
+  }
+
+  .action-btn.view-btn:hover { color: var(--accent); }
+  .action-btn.delete-btn:hover { color: #dc2626; background: rgba(220, 38, 38, 0.08); }
+
+  /* Empty state */
   .empty-state {
     text-align: center;
-    padding: 3rem 0;
+    padding: 4rem 0;
     color: var(--text-secondary);
+  }
+
+  .empty-state svg {
+    opacity: 0.3;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state p {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+
+  .empty-state span {
+    font-size: 0.9rem;
   }
 
   /* Editor meta */
   .editor-meta {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 1.25rem;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
   }
 
   .meta-row {
     display: grid;
-    grid-template-columns: 1fr 160px;
+    grid-template-columns: 1fr 180px;
     gap: 0.75rem;
   }
 
@@ -363,7 +654,7 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     cursor: pointer;
   }
 
-  /* Editor split pane */
+  /* Editor split */
   .editor-split {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -376,7 +667,7 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     display: flex;
     flex-direction: column;
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 10px;
     overflow: hidden;
   }
 
@@ -389,6 +680,18 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     background: var(--bg-secondary);
     color: var(--text-secondary);
     border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .word-count {
+    margin-left: auto;
+    font-weight: 500;
+    font-size: 0.7rem;
+    text-transform: none;
+    letter-spacing: normal;
+    opacity: 0.7;
   }
 
   #post-content {
@@ -414,6 +717,19 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
   }
 
   @media (max-width: 768px) {
+    .stats-bar {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+
+    .stat-card {
+      padding: 0.75rem;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+    }
+
     .editor-split {
       grid-template-columns: 1fr;
       min-height: 300px;
@@ -423,12 +739,29 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
       grid-template-columns: 1fr;
     }
 
-    .toolbar {
+    .toolbar,
+    .editor-toolbar {
       flex-wrap: wrap;
     }
 
     .toolbar-actions {
       flex-wrap: wrap;
+    }
+
+    .post-card-actions {
+      border-left: none;
+      border-top: 1px solid var(--border);
+      padding: 0.5rem;
+      justify-content: flex-end;
+    }
+
+    .post-card {
+      flex-direction: column;
+    }
+
+    .post-card-accent {
+      width: 100%;
+      height: 3px;
     }
   }
 </style>
@@ -437,9 +770,9 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
   import { marked } from 'https://esm.sh/marked@17';
 
-  const app = document.getElementById('admin-app');
-  const supabaseUrl = app.dataset.supabaseUrl;
-  const supabaseKey = app.dataset.supabaseKey;
+  var app = document.getElementById('admin-app');
+  var supabaseUrl = app.dataset.supabaseUrl;
+  var supabaseKey = app.dataset.supabaseKey;
 
   if (!supabaseUrl || !supabaseKey) {
     document.getElementById('login-view').innerHTML =
@@ -447,36 +780,37 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     throw new Error('Missing Supabase config');
   }
 
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  var supabase = createClient(supabaseUrl, supabaseKey);
 
-  // DOM refs
-  const loginView = document.getElementById('login-view');
-  const dashboardView = document.getElementById('dashboard-view');
-  const editorView = document.getElementById('editor-view');
-  const notification = document.getElementById('notification');
-  const loginForm = document.getElementById('login-form');
-  const loginEmail = document.getElementById('login-email');
-  const loginPassword = document.getElementById('login-password');
-  const postsList = document.getElementById('posts-list');
-  const postsEmpty = document.getElementById('posts-empty');
-  const newPostBtn = document.getElementById('new-post-btn');
-  const logoutBtn = document.getElementById('logout-btn');
-  const backBtn = document.getElementById('back-btn');
-  const saveBtn = document.getElementById('save-btn');
-  const deleteBtn = document.getElementById('delete-btn');
-  const draftCheckbox = document.getElementById('draft-checkbox');
-  const titleInput = document.getElementById('post-title');
-  const slugInput = document.getElementById('post-slug');
-  const categorySelect = document.getElementById('post-category');
-  const descriptionInput = document.getElementById('post-description');
-  const tagsInput = document.getElementById('post-tags');
-  const contentEditor = document.getElementById('post-content');
-  const previewContent = document.getElementById('preview-content');
+  var loginView = document.getElementById('login-view');
+  var dashboardView = document.getElementById('dashboard-view');
+  var editorView = document.getElementById('editor-view');
+  var notification = document.getElementById('notification');
+  var loginForm = document.getElementById('login-form');
+  var loginEmail = document.getElementById('login-email');
+  var loginPassword = document.getElementById('login-password');
+  var postsList = document.getElementById('posts-list');
+  var postsEmpty = document.getElementById('posts-empty');
+  var newPostBtn = document.getElementById('new-post-btn');
+  var logoutBtn = document.getElementById('logout-btn');
+  var backBtn = document.getElementById('back-btn');
+  var saveBtn = document.getElementById('save-btn');
+  var deleteBtn = document.getElementById('delete-btn');
+  var draftCheckbox = document.getElementById('draft-checkbox');
+  var titleInput = document.getElementById('post-title');
+  var slugInput = document.getElementById('post-slug');
+  var categorySelect = document.getElementById('post-category');
+  var descriptionInput = document.getElementById('post-description');
+  var tagsInput = document.getElementById('post-tags');
+  var contentEditor = document.getElementById('post-content');
+  var previewContent = document.getElementById('preview-content');
+  var wordCount = document.getElementById('word-count');
+  var statTotal = document.getElementById('stat-total');
+  var statPublished = document.getElementById('stat-published');
+  var statDrafts = document.getElementById('stat-drafts');
 
-  let editingId = null;
-  let dirty = false;
-
-  // --- Utilities ---
+  var editingId = null;
+  var dirty = false;
 
   function show(el) { el.hidden = false; }
   function hide(el) { el.hidden = true; }
@@ -489,24 +823,34 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
   function notify(message, type) {
     notification.textContent = message;
     notification.className = 'notification ' + type + ' show';
-    setTimeout(function () {
-      notification.classList.remove('show');
-    }, 3000);
+    setTimeout(function () { notification.classList.remove('show'); }, 3000);
   }
 
   function slugify(text) {
-    return text
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
   }
 
   function formatDate(iso) {
     return new Date(iso).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+      year: 'numeric', month: 'short', day: 'numeric',
     });
+  }
+
+  function escapeHtml(str) {
+    var el = document.createElement('span');
+    el.textContent = str;
+    return el.innerHTML;
+  }
+
+  function countWords(text) {
+    var trimmed = text.trim();
+    if (!trimmed) return 0;
+    return trimmed.split(/\s+/).length;
+  }
+
+  function updateWordCount() {
+    var count = countWords(contentEditor.value);
+    wordCount.textContent = count + ' word' + (count !== 1 ? 's' : '');
   }
 
   // --- Auth ---
@@ -526,20 +870,12 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     var btn = loginForm.querySelector('button');
     btn.disabled = true;
     btn.textContent = 'Signing in...';
-
     var resp = await supabase.auth.signInWithPassword({
-      email: loginEmail.value,
-      password: loginPassword.value,
+      email: loginEmail.value, password: loginPassword.value,
     });
-
     btn.disabled = false;
     btn.textContent = 'Sign in';
-
-    if (resp.error) {
-      notify(resp.error.message, 'error');
-      return;
-    }
-
+    if (resp.error) { notify(resp.error.message, 'error'); return; }
     showView(dashboardView);
     await loadPosts();
   });
@@ -553,9 +889,7 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
 
   async function loadPosts() {
     var resp = await supabase
-      .from('writings')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .from('writings').select('*').order('created_at', { ascending: false });
 
     if (resp.error) {
       notify('Failed to load posts: ' + resp.error.message, 'error');
@@ -565,47 +899,87 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     var posts = resp.data || [];
     postsList.innerHTML = '';
 
-    if (posts.length === 0) {
-      show(postsEmpty);
-      return;
-    }
+    var published = posts.filter(function (p) { return !p.draft; }).length;
+    var drafts = posts.length - published;
+    statTotal.textContent = posts.length;
+    statPublished.textContent = published;
+    statDrafts.textContent = drafts;
 
+    if (posts.length === 0) { show(postsEmpty); return; }
     hide(postsEmpty);
 
     posts.forEach(function (post) {
-      var row = document.createElement('div');
-      row.className = 'post-row';
-      row.innerHTML =
-        '<div class="post-row-info">' +
-          '<div class="post-row-title">' + escapeHtml(post.title) + '</div>' +
-          '<div class="post-row-meta">' +
-            '<span>' + formatDate(post.created_at) + '</span>' +
-            '<span class="tag accent">' + post.category + '</span>' +
-            '<span class="status-badge ' + (post.draft ? 'draft' : 'published') + '">' +
-              (post.draft ? 'Draft' : 'Published') +
+      var card = document.createElement('div');
+      card.className = 'post-card';
+
+      var tagsHtml = (post.tags || []).map(function (t) {
+        return '<span class="tag">' + escapeHtml(t) + '</span>';
+      }).join('');
+
+      var wc = countWords(post.content);
+
+      card.innerHTML =
+        '<div class="post-card-accent ' + post.category + '"></div>' +
+        '<div class="post-card-body">' +
+          '<div class="post-card-header">' +
+            '<span class="post-card-title">' + escapeHtml(post.title) + '</span>' +
+            '<span class="post-card-status">' +
+              '<span class="status-badge ' + (post.draft ? 'draft' : 'published') + '">' +
+                (post.draft ? 'Draft' : 'Published') +
+              '</span>' +
             '</span>' +
           '</div>' +
+          '<div class="post-card-desc">' + escapeHtml(post.description) + '</div>' +
+          '<div class="post-card-footer">' +
+            '<span class="post-card-meta">' +
+              '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+              formatDate(post.created_at) +
+            '</span>' +
+            '<span class="post-card-meta">' +
+              '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' +
+              wc + ' words' +
+            '</span>' +
+            '<span class="tag accent" style="font-size:0.7rem">' + post.category + '</span>' +
+            (tagsHtml ? '<div class="post-card-tags">' + tagsHtml + '</div>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="post-card-actions">' +
+          '<button class="action-btn view-btn" title="View post">' +
+            '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
+          '</button>' +
+          '<button class="action-btn delete-btn" title="Delete post">' +
+            '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+          '</button>' +
         '</div>';
-      row.addEventListener('click', function () { openEditor(post); });
-      postsList.appendChild(row);
+
+      card.querySelector('.post-card-body').addEventListener('click', function () {
+        openEditor(post);
+      });
+
+      card.querySelector('.view-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        window.open('/writings/?slug=' + post.slug, '_blank');
+      });
+
+      card.querySelector('.delete-btn').addEventListener('click', async function (e) {
+        e.stopPropagation();
+        if (!confirm('Delete "' + post.title + '"? This cannot be undone.')) return;
+        var r = await supabase.from('writings').delete().eq('id', post.id);
+        if (r.error) { notify('Delete failed: ' + r.error.message, 'error'); return; }
+        notify('Post deleted.', 'success');
+        await loadPosts();
+      });
+
+      postsList.appendChild(card);
     });
   }
 
-  function escapeHtml(str) {
-    var div = document.createElement('div');
-    div.appendChild(document.createTextNode(str));
-    return div.innerHTML;
-  }
-
-  newPostBtn.addEventListener('click', function () {
-    openEditor(null);
-  });
+  newPostBtn.addEventListener('click', function () { openEditor(null); });
 
   // --- Editor ---
 
   function openEditor(post) {
     editingId = post ? post.id : null;
-
     titleInput.value = post ? post.title : '';
     slugInput.value = post ? post.slug : '';
     descriptionInput.value = post ? post.description : '';
@@ -613,19 +987,20 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     tagsInput.value = post && post.tags ? post.tags.join(', ') : '';
     contentEditor.value = post ? post.content : '';
     draftCheckbox.checked = post ? post.draft : true;
-
     deleteBtn.hidden = !post;
     dirty = false;
+
+    var viewLink = document.getElementById('view-post-link');
+    if (viewLink) viewLink.remove();
+
     updatePreview();
+    updateWordCount();
     showView(editorView);
     titleInput.focus();
   }
 
-  // Auto-slug from title (new posts only)
   titleInput.addEventListener('input', function () {
-    if (!editingId) {
-      slugInput.value = slugify(titleInput.value);
-    }
+    if (!editingId) slugInput.value = slugify(titleInput.value);
     dirty = true;
   });
 
@@ -636,35 +1011,30 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     }
   );
 
-  // Tab key inserts spaces in textarea
   contentEditor.addEventListener('keydown', function (e) {
     if (e.key === 'Tab') {
       e.preventDefault();
-      var start = this.selectionStart;
-      var end = this.selectionEnd;
-      this.value = this.value.substring(0, start) + '  ' + this.value.substring(end);
-      this.selectionStart = this.selectionEnd = start + 2;
+      var s = this.selectionStart, end = this.selectionEnd;
+      this.value = this.value.substring(0, s) + '  ' + this.value.substring(end);
+      this.selectionStart = this.selectionEnd = s + 2;
       dirty = true;
       updatePreview();
+      updateWordCount();
     }
   });
 
-  // Live preview with debounce
   var previewTimer;
   contentEditor.addEventListener('input', function () {
     clearTimeout(previewTimer);
-    previewTimer = setTimeout(updatePreview, 250);
+    previewTimer = setTimeout(function () { updatePreview(); updateWordCount(); }, 250);
   });
 
   function updatePreview() {
     previewContent.innerHTML = marked.parse(contentEditor.value || '');
   }
 
-  // Unsaved changes warning
   window.addEventListener('beforeunload', function (e) {
-    if (dirty && !editorView.hidden) {
-      e.preventDefault();
-    }
+    if (dirty && !editorView.hidden) e.preventDefault();
   });
 
   backBtn.addEventListener('click', async function () {
@@ -674,7 +1044,6 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     await loadPosts();
   });
 
-  // Save
   saveBtn.addEventListener('click', async function () {
     var title = titleInput.value.trim();
     var slug = slugInput.value.trim();
@@ -686,23 +1055,14 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
       return;
     }
 
-    var tags = tagsInput.value
-      .split(',')
-      .map(function (t) { return t.trim(); })
-      .filter(Boolean);
-
+    var tags = tagsInput.value.split(',').map(function (t) { return t.trim(); }).filter(Boolean);
     var payload = {
-      title: title,
-      slug: slug,
-      description: description,
-      content: content,
-      category: categorySelect.value,
-      tags: tags,
-      draft: draftCheckbox.checked,
+      title: title, slug: slug, description: description, content: content,
+      category: categorySelect.value, tags: tags, draft: draftCheckbox.checked,
     };
 
     saveBtn.disabled = true;
-    saveBtn.textContent = 'Saving...';
+    saveBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="spin"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg> Saving...';
 
     var resp;
     if (editingId) {
@@ -712,22 +1072,17 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     }
 
     saveBtn.disabled = false;
-    saveBtn.textContent = 'Save';
+    saveBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Save';
 
     if (resp.error) {
       var msg = resp.error.message;
-      if (msg.includes('duplicate') || msg.includes('unique')) {
-        msg = 'A post with this slug already exists. Choose a different slug.';
-      }
+      if (msg.includes('duplicate') || msg.includes('unique'))
+        msg = 'A post with this slug already exists.';
       notify(msg, 'error');
       return;
     }
 
-    if (!editingId && resp.data) {
-      editingId = resp.data.id;
-      show(deleteBtn);
-    }
-
+    if (!editingId && resp.data) { editingId = resp.data.id; show(deleteBtn); }
     dirty = false;
     notify('Post saved!', 'success');
 
@@ -738,25 +1093,17 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     link.href = '/writings/?slug=' + encodeURIComponent(slugInput.value);
     link.target = '_blank';
     link.className = 'btn btn-ghost';
-    link.textContent = 'View post ↗';
-    link.style.marginLeft = '0.5rem';
+    link.innerHTML = 'View post <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
     saveBtn.parentNode.insertBefore(link, saveBtn.nextSibling);
   });
 
-  // Delete
   deleteBtn.addEventListener('click', async function () {
     if (!editingId) return;
     if (!confirm('Permanently delete this post?')) return;
-
     deleteBtn.disabled = true;
     var resp = await supabase.from('writings').delete().eq('id', editingId);
     deleteBtn.disabled = false;
-
-    if (resp.error) {
-      notify('Delete failed: ' + resp.error.message, 'error');
-      return;
-    }
-
+    if (resp.error) { notify('Delete failed: ' + resp.error.message, 'error'); return; }
     editingId = null;
     dirty = false;
     notify('Post deleted.', 'success');
@@ -764,6 +1111,5 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     await loadPosts();
   });
 
-  // --- Init ---
   checkSession();
 </script>
