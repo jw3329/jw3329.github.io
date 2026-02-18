@@ -9,14 +9,13 @@ export const SITE = {
   },
 };
 
-// Configure at https://giscus.app — enable GitHub Discussions on your repo first
 export const GISCUS = {
   repo: 'jw3329/jw3329.github.io' as const,
-  repoId: '', // TODO: get from https://giscus.app
+  repoId: 'MDEwOlJlcG9zaXRvcnkxNzcwNzQ5OTU=',
   category: 'Announcements',
-  categoryId: '', // TODO: get from https://giscus.app
+  categoryId: 'DIC_kwDOCo3zM84C2sB8',
   mapping: 'pathname' as const,
   reactionsEnabled: true,
-  inputPosition: 'top' as const,
+  inputPosition: 'bottom' as const,
   lang: 'en',
 };

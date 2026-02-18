@@ -1,13 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
-import WritingCard from '../components/WritingCard.astro';
 import ProjectCard from '../components/ProjectCard.astro';
-import { getWritings } from '../lib/writings';
 import { getCollection } from 'astro:content';
 
-const allWritings = await getWritings();
-const recentWritings = allWritings.slice(0, 3);
+const supabaseUrl = import.meta.env.SUPABASE_URL || '';
+const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
 
 const allProjects = (await getCollection('projects'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
@@ -75,20 +73,13 @@ const featuredProjects = allProjects
       <h2>Recent Writings</h2>
       <a href="/writings/">View all &rarr;</a>
     </div>
-    {recentWritings.length > 0 ? (
-      recentWritings.map((writing) => (
-        <WritingCard
-          title={writing.title}
-          description={writing.description}
-          date={new Date(writing.created_at)}
-          category={writing.category}
-          slug={writing.slug}
-          tags={writing.tags}
-        />
-      ))
-    ) : (
-      <p style="color: var(--text-secondary);">Writings coming soon...</p>
-    )}
+    <div
+      id="recent-writings"
+      data-supabase-url={supabaseUrl}
+      data-supabase-key={supabaseKey}
+    >
+      <p style="color: var(--text-secondary);">Loading...</p>
+    </div>
   </section>
 
   <section style="margin-top: 3rem;">
@@ -246,4 +237,96 @@ const featuredProjects = allProjects
       flex-wrap: wrap;
     }
   }
+
+  .writing-card {
+    display: block;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--border);
+    transition: all var(--transition);
+    text-decoration: none;
+  }
+
+  .writing-card:hover {
+    padding-left: 0.5rem;
+  }
+
+  .writing-card:hover h3 {
+    color: var(--accent);
+  }
+
+  .writing-card .card-top {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .writing-card time {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .writing-card h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    transition: color var(--transition);
+    color: var(--text);
+  }
+
+  .writing-card p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+    line-height: 1.5;
+  }
+
+  .writing-card .card-tags {
+    display: flex;
+    gap: 0.35rem;
+    margin-top: 0.6rem;
+  }
 </style>
+
+<script type="module" is:inline>
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  var container = document.getElementById('recent-writings');
+  var url = container.dataset.supabaseUrl;
+  var key = container.dataset.supabaseKey;
+
+  if (!url || !key) {
+    container.innerHTML = '<p style="color:var(--text-secondary)">Writings coming soon...</p>';
+  } else {
+    var supabase = createClient(url, key);
+
+    var resp = await supabase
+      .from('writings')
+      .select('*')
+      .eq('draft', false)
+      .order('created_at', { ascending: false })
+      .limit(3);
+
+    if (resp.error || !resp.data || resp.data.length === 0) {
+      container.innerHTML = '<p style="color:var(--text-secondary)">Writings coming soon...</p>';
+    } else {
+      container.innerHTML = resp.data.map(function (w) {
+        var date = new Date(w.created_at);
+        var formatted = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        var tags = (w.tags || []).map(function (t) {
+          return '<span class="tag">' + t + '</span>';
+        }).join('');
+
+        return '<a href="/writings/?slug=' + w.slug + '" class="writing-card">' +
+          '<div class="card-top">' +
+            '<time datetime="' + date.toISOString() + '">' + formatted + '</time>' +
+            '<span class="tag accent">' + w.category + '</span>' +
+          '</div>' +
+          '<h3>' + w.title + '</h3>' +
+          '<p>' + w.description + '</p>' +
+          (tags ? '<div class="card-tags">' + tags + '</div>' : '') +
+        '</a>';
+      }).join('');
+    }
+  }
+</script>

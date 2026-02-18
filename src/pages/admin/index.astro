@@ -729,7 +729,18 @@ const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
     }
 
     dirty = false;
-    notify('Post saved! Site will reflect changes after the next build.', 'success');
+    notify('Post saved!', 'success');
+
+    var viewLink = document.getElementById('view-post-link');
+    if (viewLink) viewLink.remove();
+    var link = document.createElement('a');
+    link.id = 'view-post-link';
+    link.href = '/writings/?slug=' + encodeURIComponent(slugInput.value);
+    link.target = '_blank';
+    link.className = 'btn btn-ghost';
+    link.textContent = 'View post ↗';
+    link.style.marginLeft = '0.5rem';
+    saveBtn.parentNode.insertBefore(link, saveBtn.nextSibling);
   });
 
   // Delete

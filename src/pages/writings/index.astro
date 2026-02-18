@@ -1,60 +1,427 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import WritingCard from '../../components/WritingCard.astro';
-import { getWritings } from '../../lib/writings';
+import { GISCUS } from '../../config';
 
-const allWritings = await getWritings();
+const supabaseUrl = import.meta.env.SUPABASE_URL || '';
+const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
 ---
 
 <BaseLayout title="Writings" description="Thoughts on development, life, and everything in between.">
-  <div class="page-header">
-    <h1>Writings</h1>
-    <p>Thoughts on development, life, and everything in between.</p>
-  </div>
-
-  <div class="category-filters">
-    <button class="active" data-filter="all">All</button>
-    <button data-filter="dev">Dev</button>
-    <button data-filter="personal">Personal</button>
-  </div>
-
-  <div id="writings-list">
-    {allWritings.map((writing) => (
-      <div data-category={writing.category}>
-        <WritingCard
-          title={writing.title}
-          description={writing.description}
-          date={new Date(writing.created_at)}
-          category={writing.category}
-          slug={writing.slug}
-          tags={writing.tags}
-        />
+  <div
+    id="writings-app"
+    data-supabase-url={supabaseUrl}
+    data-supabase-key={supabaseKey}
+    data-giscus={JSON.stringify(GISCUS)}
+  >
+    <!-- List View -->
+    <div id="list-view">
+      <div class="page-header">
+        <h1>Writings</h1>
+        <p>Thoughts on development, life, and everything in between.</p>
       </div>
-    ))}
-  </div>
 
-  {allWritings.length === 0 && (
-    <p style="color: var(--text-secondary); text-align: center; padding: 3rem 0;">
-      No writings yet. Check back soon!
-    </p>
-  )}
+      <div class="category-filters">
+        <button class="active" data-filter="all">All</button>
+        <button data-filter="dev">Dev</button>
+        <button data-filter="personal">Personal</button>
+      </div>
+
+      <div id="writings-list"></div>
+      <div id="writings-loading" class="loading-state">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+      <p id="writings-empty" class="empty-state" hidden>
+        No writings yet. Check back soon!
+      </p>
+    </div>
+
+    <!-- Post View -->
+    <div id="post-view" hidden>
+      <a href="/writings/" id="back-link" class="back-link">&larr; Back to writings</a>
+      <div id="post-loading" class="loading-state">
+        <div class="skeleton-title"></div>
+        <div class="skeleton-meta"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line"></div>
+      </div>
+      <article id="post-article" hidden>
+        <div class="article-header">
+          <h1 id="post-title"></h1>
+          <div class="writing-meta">
+            <time id="post-date"></time>
+            <span id="post-category" class="tag accent"></span>
+            <div id="post-tags" class="writing-meta tags"></div>
+          </div>
+        </div>
+        <div id="post-content" class="prose"></div>
+      </article>
+      <section id="post-giscus" class="giscus-wrapper" aria-label="Comments"></section>
+    </div>
+  </div>
 </BaseLayout>
 
-<script is:inline>
-  document.querySelectorAll('.category-filters button').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const filter = btn.getAttribute('data-filter');
+<style>
+  /* Writing card styles */
+  .writing-card {
+    display: block;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--border);
+    transition: all var(--transition);
+    text-decoration: none;
+    cursor: pointer;
+  }
 
-      document.querySelectorAll('.category-filters button').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
+  .writing-card:hover {
+    padding-left: 0.5rem;
+  }
 
-      document.querySelectorAll('#writings-list > div').forEach((card) => {
-        if (filter === 'all' || card.getAttribute('data-category') === filter) {
-          card.style.display = '';
-        } else {
-          card.style.display = 'none';
-        }
+  .writing-card:hover h3 {
+    color: var(--accent);
+  }
+
+  .writing-card .card-top {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .writing-card time {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .writing-card h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    transition: color var(--transition);
+    color: var(--text);
+  }
+
+  .writing-card p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+    line-height: 1.5;
+  }
+
+  .writing-card .card-tags {
+    display: flex;
+    gap: 0.35rem;
+    margin-top: 0.6rem;
+  }
+
+  /* Loading skeletons */
+  .loading-state {
+    padding: 1rem 0;
+  }
+
+  .skeleton-card,
+  .skeleton-title,
+  .skeleton-meta,
+  .skeleton-line {
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  .skeleton-card {
+    height: 90px;
+    margin-bottom: 1rem;
+  }
+
+  .skeleton-title {
+    height: 2.5rem;
+    width: 70%;
+    margin-bottom: 1rem;
+  }
+
+  .skeleton-meta {
+    height: 1.25rem;
+    width: 40%;
+    margin-bottom: 2rem;
+  }
+
+  .skeleton-line {
+    height: 1rem;
+    width: 100%;
+    margin-bottom: 0.75rem;
+  }
+
+  .skeleton-line.short {
+    width: 60%;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 0;
+    color: var(--text-secondary);
+  }
+
+  .giscus-wrapper {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+</style>
+
+<script type="module" is:inline>
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  import { marked } from 'https://esm.sh/marked@17';
+
+  var app = document.getElementById('writings-app');
+  var supabaseUrl = app.dataset.supabaseUrl;
+  var supabaseKey = app.dataset.supabaseKey;
+  var giscusConfig = JSON.parse(app.dataset.giscus || '{}');
+
+  if (!supabaseUrl || !supabaseKey) {
+    document.getElementById('writings-loading').innerHTML =
+      '<p class="empty-state">Unable to load writings.</p>';
+    throw new Error('Missing Supabase config');
+  }
+
+  var supabase = createClient(supabaseUrl, supabaseKey);
+
+  var listView = document.getElementById('list-view');
+  var postView = document.getElementById('post-view');
+  var writingsList = document.getElementById('writings-list');
+  var writingsLoading = document.getElementById('writings-loading');
+  var writingsEmpty = document.getElementById('writings-empty');
+  var backLink = document.getElementById('back-link');
+  var postLoading = document.getElementById('post-loading');
+  var postArticle = document.getElementById('post-article');
+  var postTitle = document.getElementById('post-title');
+  var postDate = document.getElementById('post-date');
+  var postCategory = document.getElementById('post-category');
+  var postTags = document.getElementById('post-tags');
+  var postContent = document.getElementById('post-content');
+  var postGiscus = document.getElementById('post-giscus');
+
+  var cachedPosts = null;
+  var currentFilter = 'all';
+
+  function escapeHtml(str) {
+    var el = document.createElement('span');
+    el.textContent = str;
+    return el.innerHTML;
+  }
+
+  function formatDate(iso) {
+    return new Date(iso).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  }
+
+  function formatDateLong(iso) {
+    return new Date(iso).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  }
+
+  // --- List View ---
+
+  async function loadList() {
+    listView.hidden = false;
+    postView.hidden = true;
+
+    if (cachedPosts) {
+      renderList(cachedPosts);
+      return;
+    }
+
+    writingsLoading.hidden = false;
+    writingsList.innerHTML = '';
+    writingsEmpty.hidden = true;
+
+    var resp = await supabase
+      .from('writings')
+      .select('*')
+      .eq('draft', false)
+      .order('created_at', { ascending: false });
+
+    writingsLoading.hidden = true;
+
+    if (resp.error) {
+      writingsEmpty.textContent = 'Failed to load writings.';
+      writingsEmpty.hidden = false;
+      return;
+    }
+
+    cachedPosts = resp.data || [];
+    renderList(cachedPosts);
+  }
+
+  function renderList(posts) {
+    var filtered = currentFilter === 'all'
+      ? posts
+      : posts.filter(function (p) { return p.category === currentFilter; });
+
+    writingsList.innerHTML = '';
+
+    if (filtered.length === 0) {
+      writingsEmpty.hidden = false;
+      return;
+    }
+
+    writingsEmpty.hidden = true;
+
+    filtered.forEach(function (post) {
+      var card = document.createElement('a');
+      card.className = 'writing-card';
+      card.href = '/writings/?slug=' + post.slug;
+      card.innerHTML =
+        '<div class="card-top">' +
+          '<time datetime="' + new Date(post.created_at).toISOString() + '">' +
+            formatDate(post.created_at) +
+          '</time>' +
+          '<span class="tag accent">' + escapeHtml(post.category) + '</span>' +
+        '</div>' +
+        '<h3>' + escapeHtml(post.title) + '</h3>' +
+        '<p>' + escapeHtml(post.description) + '</p>' +
+        (post.tags && post.tags.length > 0
+          ? '<div class="card-tags">' +
+              post.tags.map(function (t) { return '<span class="tag">' + escapeHtml(t) + '</span>'; }).join('') +
+            '</div>'
+          : '');
+
+      card.addEventListener('click', function (e) {
+        e.preventDefault();
+        history.pushState({ slug: post.slug }, '', '/writings/?slug=' + post.slug);
+        showPost(post.slug);
       });
+
+      writingsList.appendChild(card);
+    });
+  }
+
+  // Category filters
+  document.querySelectorAll('.category-filters button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.category-filters button').forEach(function (b) {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+      currentFilter = btn.getAttribute('data-filter');
+      if (cachedPosts) renderList(cachedPosts);
     });
   });
+
+  // --- Post View ---
+
+  async function showPost(slug) {
+    listView.hidden = true;
+    postView.hidden = false;
+    postArticle.hidden = true;
+    postLoading.hidden = false;
+    postGiscus.innerHTML = '';
+
+    var resp = await supabase
+      .from('writings')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+
+    postLoading.hidden = true;
+
+    if (resp.error || !resp.data) {
+      postArticle.hidden = false;
+      postTitle.textContent = 'Post not found';
+      postContent.innerHTML = '<p>This writing doesn\'t exist or has been removed.</p>';
+      return;
+    }
+
+    var post = resp.data;
+    var createdAt = new Date(post.created_at);
+
+    postTitle.textContent = post.title;
+    postDate.textContent = formatDateLong(post.created_at);
+    postDate.setAttribute('datetime', createdAt.toISOString());
+    postCategory.textContent = post.category;
+
+    postTags.innerHTML = '';
+    if (post.tags && post.tags.length > 0) {
+      post.tags.forEach(function (tag) {
+        var span = document.createElement('span');
+        span.className = 'tag';
+        span.textContent = tag;
+        postTags.appendChild(span);
+      });
+    }
+
+    postContent.innerHTML = marked.parse(post.content);
+    postArticle.hidden = false;
+
+    document.title = post.title + ' | Writings';
+    loadGiscus(slug);
+    window.scrollTo(0, 0);
+  }
+
+  function loadGiscus(slug) {
+    if (!giscusConfig.repoId) return;
+
+    var theme = document.documentElement.getAttribute('data-theme') === 'dark'
+      ? 'dark'
+      : 'light';
+
+    var script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    script.setAttribute('data-repo', giscusConfig.repo || '');
+    script.setAttribute('data-repo-id', giscusConfig.repoId || '');
+    script.setAttribute('data-category', giscusConfig.category || '');
+    script.setAttribute('data-category-id', giscusConfig.categoryId || '');
+    script.setAttribute('data-mapping', 'specific');
+    script.setAttribute('data-term', '/writings/' + slug + '/');
+    script.setAttribute('data-strict', '0');
+    script.setAttribute('data-reactions-enabled', giscusConfig.reactionsEnabled ? '1' : '0');
+    script.setAttribute('data-emit-metadata', '0');
+    script.setAttribute('data-input-position', giscusConfig.inputPosition || 'top');
+    script.setAttribute('data-theme', theme);
+    script.setAttribute('data-lang', giscusConfig.lang || 'en');
+    script.setAttribute('crossorigin', 'anonymous');
+    script.async = true;
+    postGiscus.appendChild(script);
+  }
+
+  // --- Navigation ---
+
+  backLink.addEventListener('click', function (e) {
+    e.preventDefault();
+    history.pushState({}, '', '/writings/');
+    document.title = 'Writings | Junwon Jung';
+    loadList();
+  });
+
+  window.addEventListener('popstate', function () {
+    var params = new URLSearchParams(window.location.search);
+    var slug = params.get('slug');
+    if (slug) {
+      showPost(slug);
+    } else {
+      document.title = 'Writings | Junwon Jung';
+      loadList();
+    }
+  });
+
+  // --- Init ---
+
+  var params = new URLSearchParams(window.location.search);
+  var slug = params.get('slug');
+  if (slug) {
+    showPost(slug);
+  } else {
+    loadList();
+  }
 </script>

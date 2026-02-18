@@ -15,6 +15,8 @@ export interface Writing {
 }
 
 export async function getWritings(): Promise<Writing[]> {
+  if (!supabase) return [];
+
   const { data, error } = await supabase
     .from('writings')
     .select('*')
@@ -30,6 +32,8 @@ export async function getWritings(): Promise<Writing[]> {
 }
 
 export async function getWritingBySlug(slug: string): Promise<Writing | null> {
+  if (!supabase) return null;
+
   const { data, error } = await supabase
     .from('writings')
     .select('*')
