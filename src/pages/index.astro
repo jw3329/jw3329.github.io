@@ -7,8 +7,6 @@ import { SITE } from '../config';
 import { getWritings } from '../lib/writings';
 import { getCollection } from 'astro:content';
 
-const supabaseUrl = import.meta.env.SUPABASE_URL || '';
-const supabaseKey = import.meta.env.SUPABASE_ANON_KEY || '';
 const recentWritings = (await getWritings()).slice(0, 3);
 
 const allProjects = (await getCollection('projects'))
@@ -97,11 +95,7 @@ const homepageJsonLd = [
       <h2>Recent Writings</h2>
       <a href="/writings/">View all &rarr;</a>
     </div>
-    <div
-      id="recent-writings"
-      data-supabase-url={supabaseUrl}
-      data-supabase-key={supabaseKey}
-    >
+    <div id="recent-writings">
       {recentWritings.length > 0 ? (
         recentWritings.map((writing) => (
           <WritingCard
@@ -114,7 +108,7 @@ const homepageJsonLd = [
           />
         ))
       ) : (
-        <p style="color: var(--text-secondary);">Loading...</p>
+        <p style="color: var(--text-secondary);">No writings yet.</p>
       )}
     </div>
   </section>
@@ -325,49 +319,3 @@ const homepageJsonLd = [
   }
 </style>
 
-<script type="module" is:inline>
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-  var container = document.getElementById('recent-writings');
-  var url = container.dataset.supabaseUrl;
-  var key = container.dataset.supabaseKey;
-
-  if (!url || !key) {
-    if (!container.querySelector('.writing-card')) {
-      container.innerHTML = '<p style="color:var(--text-secondary)">Writings coming soon...</p>';
-    }
-  } else {
-    var supabase = createClient(url, key);
-
-    var resp = await supabase
-      .from('writings')
-      .select('*')
-      .eq('draft', false)
-      .order('created_at', { ascending: false })
-      .limit(3);
-
-    if (resp.error || !resp.data || resp.data.length === 0) {
-      if (!container.querySelector('.writing-card')) {
-        container.innerHTML = '<p style="color:var(--text-secondary)">Writings coming soon...</p>';
-      }
-    } else {
-      container.innerHTML = resp.data.map(function (w) {
-        var date = new Date(w.created_at);
-        var formatted = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-        var tags = (w.tags || []).map(function (t) {
-          return '<span class="tag">' + t + '</span>';
-        }).join('');
-
-        return '<a href="/writings/?slug=' + w.slug + '" class="writing-card">' +
-          '<div class="card-top">' +
-            '<time datetime="' + date.toISOString() + '">' + formatted + '</time>' +
-            '<span class="tag accent">' + w.category + '</span>' +
-          '</div>' +
-          '<h3>' + w.title + '</h3>' +
-          '<p>' + w.description + '</p>' +
-          (tags ? '<div class="card-tags">' + tags + '</div>' : '') +
-        '</a>';
-      }).join('');
-    }
-  }
-</script>

@@ -1,8 +1,7 @@
-import { supabase } from './supabase';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import { marked } from 'marked';
 
 export interface Writing {
-  id: string;
   slug: string;
   title: string;
   description: string;
@@ -11,41 +10,31 @@ export interface Writing {
   tags: string[];
   draft: boolean;
   created_at: string;
-  updated_at: string;
+}
+
+function toWriting(entry: CollectionEntry<'writings'>): Writing {
+  return {
+    slug: entry.id,
+    title: entry.data.title,
+    description: entry.data.description,
+    content: entry.body ?? '',
+    category: entry.data.category,
+    tags: entry.data.tags,
+    draft: entry.data.draft,
+    created_at: entry.data.date.toISOString(),
+  };
 }
 
 export async function getWritings(): Promise<Writing[]> {
-  if (!supabase) return [];
-
-  const { data, error } = await supabase
-    .from('writings')
-    .select('*')
-    .eq('draft', false)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Error fetching writings:', error.message);
-    return [];
-  }
-
-  return data as Writing[];
+  const entries = await getCollection('writings', ({ data }) => !data.draft);
+  return entries
+    .map(toWriting)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at));
 }
 
 export async function getWritingBySlug(slug: string): Promise<Writing | null> {
-  if (!supabase) return null;
-
-  const { data, error } = await supabase
-    .from('writings')
-    .select('*')
-    .eq('slug', slug)
-    .single();
-
-  if (error) {
-    console.error('Error fetching writing:', error.message);
-    return null;
-  }
-
-  return data as Writing;
+  const writings = await getWritings();
+  return writings.find((w) => w.slug === slug) ?? null;
 }
 
 export function renderMarkdown(content: string): string {
