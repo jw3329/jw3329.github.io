@@ -2,12 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import ProjectCard from '../components/ProjectCard.astro';
-import WritingCard from '../components/WritingCard.astro';
 import { SITE } from '../config';
-import { getWritings } from '../lib/writings';
 import { getCollection } from 'astro:content';
-
-const recentWritings = (await getWritings()).slice(0, 3);
 
 const allProjects = (await getCollection('projects'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
@@ -37,7 +33,7 @@ const homepageJsonLd = [
 ];
 ---
 
-<BaseLayout title="AI Agent Engineer, Product Builder & Writer" jsonLd={homepageJsonLd}>
+<BaseLayout title="AI Agent Engineer & Product Builder" jsonLd={homepageJsonLd}>
   <Hero />
 
   <section class="products-section">
@@ -90,28 +86,6 @@ const homepageJsonLd = [
     </div>
   </section>
 
-  <section style="margin-top: 3rem;">
-    <div class="section-header">
-      <h2>Recent Writings</h2>
-      <a href="/writings/">View all &rarr;</a>
-    </div>
-    <div id="recent-writings">
-      {recentWritings.length > 0 ? (
-        recentWritings.map((writing) => (
-          <WritingCard
-            title={writing.title}
-            description={writing.description}
-            date={new Date(writing.created_at)}
-            category={writing.category}
-            slug={writing.slug}
-            tags={writing.tags}
-          />
-        ))
-      ) : (
-        <p style="color: var(--text-secondary);">No writings yet.</p>
-      )}
-    </div>
-  </section>
 
   <section style="margin-top: 3rem;">
     <div class="section-header">
@@ -269,53 +243,5 @@ const homepageJsonLd = [
     }
   }
 
-  .writing-card {
-    display: block;
-    padding: 1.25rem 0;
-    border-bottom: 1px solid var(--border);
-    transition: all var(--transition);
-    text-decoration: none;
-  }
-
-  .writing-card:hover {
-    padding-left: 0.5rem;
-  }
-
-  .writing-card:hover h3 {
-    color: var(--accent);
-  }
-
-  .writing-card .card-top {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .writing-card time {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-  }
-
-  .writing-card h3 {
-    font-size: 1.15rem;
-    font-weight: 600;
-    margin-bottom: 0.35rem;
-    transition: color var(--transition);
-    color: var(--text);
-  }
-
-  .writing-card p {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin-bottom: 0;
-    line-height: 1.5;
-  }
-
-  .writing-card .card-tags {
-    display: flex;
-    gap: 0.35rem;
-    margin-top: 0.6rem;
-  }
 </style>
 
