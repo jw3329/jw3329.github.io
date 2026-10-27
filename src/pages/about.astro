@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="About" description="Junwon Jung — software engineer, builder, and writer based in Mountain View, California.">
+<BaseLayout title="About" description="Junwon Jung — AI agent engineer, builder, and writer based in Mountain View, California.">
   <div class="page-header">
     <h1>About</h1>
     <p>The short version: I build things, break things, and make sure they stay running.</p>
@@ -10,15 +10,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   <div class="prose">
     <p>
-      I'm Junwon — a Full Stack and Backend Software Engineer based in Mountain View, California, with 6+ years
-      of experience designing, developing, and deploying scalable applications. Currently a Member of Technical Staff at
-      <strong>CurieTech AI</strong>.
+      I'm Junwon — an AI agent engineer based in Mountain View, California, with 8+ years in backend, payments and
+      reliability. I'm a Member of Technical Staff at <strong>CurieTech AI</strong> and a core contributor to
+      <a href="/projects/curie/">Curie</a>, an open-source platform that runs LLM agents as co-workers inside a team's own
+      infrastructure. I build agents the way an SRE would: with approvals, evals and observability from day one.
     </p>
 
     <p>
-      Before that, I spent 2.5 years at <strong>TikTok</strong> — first as a <strong>Site Reliability Engineer</strong>
-      overseeing 90% of TikTok's US payment system, then as a <strong>Software Engineer on the Risk team</strong>
-      building fraud detection and chargeback systems. Before TikTok, I was at <strong>Homethrive</strong>
+      Before that, I spent 2.5 years at <strong>TikTok</strong> as a <strong>Site Reliability Engineer</strong> on the
+      team that ran TikTok's US payment systems, and from late 2023 also as a <strong>Software Engineer on the Risk
+      team</strong>, building fraud and chargeback tooling. Before TikTok, I was at <strong>Homethrive</strong>
       building full-stack products in healthcare, and before that at <strong>Tata Consultancy Services</strong>
       where I started my career migrating enterprise data systems and leading a team of engineers.
     </p>
@@ -49,7 +50,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <h3>CurieTech AI</h3>
         <span class="exp-meta">Member of Technical Staff &middot; Jun 2025 – Present &middot; Sunnyvale, CA</span>
       </div>
-      <p>Early-stage AI startup building developer tools. Working across the full stack on core product.</p>
+      <p>AI startup building agents for software and operations teams.</p>
+      <ul>
+        <li>Second-largest contributor to <a href="https://github.com/curie-eng/curie" target="_blank" rel="noopener noreferrer">Curie</a>, an open-source (Apache-2.0) agent platform, with 560+ merged PRs since July 2026; now live with its first production client</li>
+        <li>Built production agents on Curie for its first enterprise client: a quarterly financial reporting agent on QuickBooks Online data, and a brand marketing agent that generates on-brand images and video</li>
+        <li>Built the SRE co-worker, which reads real-time alert emails, investigates Kubernetes, Prometheus and Grafana, and posts a diagnosis with suggested fixes in Slack</li>
+        <li>Designed the agent safety model: human approval flows, operator remediation policies, per-stage action receipts, sealed per-connector secrets and one Slack identity per bot</li>
+        <li>Built the "mean tester", an adversarial agent that tries to break other agents and issues a computed ship verdict, plus drift canaries; cut model cost with prompt-cache-safe resume and memory compaction</li>
+        <li>Built much of the Rust <code>curie</code> CLI and Helm deployment: one-file declarative installs, one-command repo onboarding and git-flow deploy targets</li>
+        <li>Before Curie, built the MuleSoft AI product end to end: a chat-based agent that replaced a legacy workflow and grew active users, and agents that migrate integrations between platforms</li>
+        <li>Fully automated Stripe subscription and usage billing with an ops admin console; saved $780/month by removing a cache with a 2.1% hit rate</li>
+      </ul>
     </div>
 
     <div class="experience-item">
@@ -57,16 +68,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <h3>TikTok</h3>
         <span class="exp-meta">Jan 2023 – Jun 2025 &middot; Mountain View, CA</span>
       </div>
-      <h4>Software Engineer, Risk (Sep 2023 – Jun 2025)</h4>
+      <h4>Software Engineer, Risk (Sep 2023 – Jun 2025, concurrent with SRE)</h4>
       <ul>
         <li>Engineered daily fraud and chargeback status reports via chatbot, reducing manual workload by 30%</li>
         <li>Managed the risk platform, optimizing frontend and backend components to cut development turnaround by 50%</li>
         <li>Enhanced multi-channel chargeback logic, achieving 70% faster validation and 100% reliability</li>
         <li>Designed a risk assessment framework adopted by 12+ team members, improving workload efficiency by 60%</li>
       </ul>
-      <h4>Site Reliability Engineer, Global Payments (Jan 2023 – Sep 2023)</h4>
+      <h4>Site Reliability Engineer, Global Payments (Jan 2023 – Jun 2025)</h4>
       <ul>
-        <li>Oversaw the stability of 90% of TikTok's US payment system, ensuring seamless transactions and minimal downtime</li>
+        <li>On the SRE team that ran TikTok's US payment systems, including on-call</li>
         <li>Built a configuration difference finder service, cutting debugging time by 70% through automated deployment analysis</li>
         <li>Directed "Project Ticker," a visualization tool that reduced on-call status checks by 80% and debugging time by 50%</li>
         <li>Spearheaded TikTok Pay development, earning a top-3 ranking in internal innovation projects</li>
@@ -133,9 +144,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     <div class="skills-grid">
       <div>
+        <h4>AI &amp; Agents</h4>
+        <div class="tech-stack">
+          <span class="tag">Claude API</span>
+          <span class="tag">MCP</span>
+          <span class="tag">Tool use</span>
+          <span class="tag">Agent evals</span>
+          <span class="tag">Prompt caching</span>
+          <span class="tag">Human-in-the-loop design</span>
+        </div>
+      </div>
+      <div>
         <h4>Languages</h4>
         <div class="tech-stack">
           <span class="tag">Python</span>
+          <span class="tag">Rust</span>
           <span class="tag">Go</span>
           <span class="tag">JavaScript</span>
           <span class="tag">TypeScript</span>
@@ -175,7 +198,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <div class="tech-stack">
           <span class="tag">Docker</span>
           <span class="tag">Kubernetes</span>
+          <span class="tag">Helm</span>
           <span class="tag">Terraform</span>
+          <span class="tag">Prometheus</span>
+          <span class="tag">Grafana</span>
+          <span class="tag">OpenTelemetry</span>
           <span class="tag">GitHub Actions</span>
           <span class="tag">Jenkins</span>
           <span class="tag">Kafka</span>

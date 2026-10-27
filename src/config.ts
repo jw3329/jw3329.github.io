@@ -1,6 +1,6 @@
 export const SITE = {
   title: 'Junwon Jung',
-  description: 'Software engineer at CurieTech AI. Ex-TikTok. Cofounder of Moim, founder of WiseBuy. Writing about dev, life, and everything in between.',
+  description: 'AI agent engineer at CurieTech AI and core contributor to the open-source Curie agent platform. Ex-TikTok payments SRE. Cofounder of Moim, founder of WiseBuy. Writing about dev, life, and everything in between.',
   url: 'https://jw3329.github.io',
   author: 'Junwon Jung',
   socials: {
